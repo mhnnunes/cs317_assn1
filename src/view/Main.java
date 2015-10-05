@@ -4,9 +4,8 @@ import java.lang.System;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
-import javax.swing.JOptionPane;
-
+import model.*;
+import controller.*;
 import connection.ServerConnect;
 public class Main {
 
@@ -16,12 +15,13 @@ public class Main {
 	
 	public static void main(String [] args){
 		
-		String[] parameters;
 		String command = null;
-//		byte cmdString[] = new byte[MAX_LEN];
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
-		int len = 0;
-		ServerConnect dictServer;
+		ServerConnect dictServer = new ServerConnect();
+		ServerResponse sR = new ServerResponse();
+		DictControl controller = new DictControl();
+		Interpret interpreter;
+		Command cmd;
 		
 		//Check the number of arguments passed to the program
 		if (args.length == PERMITTED_ARGUMENT_COUNT) {
@@ -42,14 +42,27 @@ public class Main {
 			while(true){
 				System.out.print("csdict> ");
 				command = stdIn.readLine();
-				len = command.length();
-				parameters = command.split("\\s+");
-				JOptionPane.showMessageDialog(null, "Len: " + len + "  cmdString: " + command);
-				JOptionPane.showMessageDialog(null, "parameter 1" + parameters[0] + "parameter 2" + parameters[1] + "parameter 3" + parameters[2]);
-				if (len <= 0) break;
-				//TODO processing / translating the commands will be done by ellie
-				// Start processing the command here.
-				System.out.println("900 Invalid command.");
+				cmd = new Command(command);
+				//TODO Treat empty line cases and # line cases
+				if(cmd.getNumArgs() >= 1){
+					if(cmd.getArg0().equalsIgnoreCase("open")){ //Is it an "open" command?
+						System.out.println("Got in the open command case");
+						if(dictServer.isConnected()){ //Is a connection already established?
+							System.out.println("900 Invalid command. connection already opened");
+						}else{
+							System.out.println("Opening connection, Hostname : " + cmd.getArg1());
+							if(cmd.getNumArgs() == 3) dictServer = new ServerConnect(cmd.getArg1(),Integer.parseInt(cmd.getArg2())); //User provides hostname & port
+							else if (cmd.getNumArgs() == 2) dictServer = new ServerConnect(cmd.getArg1()); //User provides only hostname
+						}
+					}else{
+						interpreter = new Interpret(cmd, dictServer, debugOn);
+						System.out.println("Got here after interpreting.");
+						sR = controller.getsResponse(dictServer, debugOn);
+						if(sR.isSuccess()){
+							System.out.println(sR.getText());
+						}
+					}
+				}
 			}
 		} catch (IOException exception) {
 			System.err.println("998 Input error while reading commands, terminating.");
