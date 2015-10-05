@@ -17,8 +17,9 @@ public class Command {
 	}
 	
 	public void initCommand(String str) {
+		if(str.isEmpty()) System.out.println("String is emptyyyyy");
 		String[] args = str.split("\\s+");
-		System.out.println("Passou daqui, lenght:  " + args.length );
+		System.out.println("Passed this point, lenght:  " + args.length );
 		for(String s : args)
 			System.out.println(s);
 		if (args.length == 0) {

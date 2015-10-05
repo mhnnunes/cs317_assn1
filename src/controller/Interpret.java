@@ -9,42 +9,70 @@ import controller.DictControl;
 // TODO: use assert instead of a bunch of throw exceptions
 
 public class Interpret {
-	Command command;
 	
 	// the command
-	private static String cmd;
+	private String cmd;
+
 	// args
-	private static String arg1;
-
-	private static String arg2;
-
-	private static String arg3;
+	private String arg1;
 
 	// number of strings; won't be 0
-	private static int num;
+	private int num;
 
 	// the dictionary we choose
-	private static String dictionary;
+	private String dictionary;
 
-	public Interpret(Command command, ServerConnect dictServer, ServerResponse sR, boolean debugOn) throws IOException{
-		this.command = command;
-		cmd = command.getArg0();
-		arg1 = command.getArg1();
-		arg2 = command.getArg2();
-		arg3 = command.getArg3();
-		num = command.getNumArgs();
-		dictionary = "*";
-
-		interpret(cmd, dictServer, dictionary, sR, debugOn);
+	public Interpret(){
+		this.cmd = "";
+		this.arg1 = "";
+		this.num = 0;
+		this.dictionary = "*";
+	}
+	
+	public String getCmd() {
+		return cmd;
 	}
 
-	public static void interpret(String cmd, ServerConnect dictServer, String dictionary, ServerResponse sR,  boolean debugOn) throws IOException {
+	public void setCmd(String cmd) {
+		this.cmd = cmd;
+	}
+
+	public String getArg1() {
+		return arg1;
+	}
+
+	public void setArg1(String arg1) {
+		this.arg1 = arg1;
+	}
+
+	public int getNum() {
+		return num;
+	}
+
+	public void setNum(int num) {
+		this.num = num;
+	}
+
+	public String getDictionary() {
+		return dictionary;
+	}
+
+	public void setDictionary(String dictionary) {
+		this.dictionary = dictionary;
+	}
+	
+	public void setCommand(Command cmd){
+		this.cmd = cmd.getArg0();
+		this.arg1 = cmd.getArg1();
+		this.num = cmd.getNumArgs();
+	}
+	public void interpret(Interpret iNT, ServerConnect dictServer, String dictionary, ServerResponse sR,  boolean debugOn) throws IOException {
 		DictControl controller = new DictControl();
 		if (dictServer.isConnected()) {
 			// call dict
 			// require: connection
 			if (cmd.toLowerCase().equals("dict")) {
-				if (num > 1) {
+				if (iNT.getNum() > 1) {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
 					if(debugOn) System.out.println("--> show db");
@@ -55,63 +83,55 @@ public class Interpret {
 					}
 				}
 			}else if (cmd.toLowerCase().equals("set")) { 		//call set
-				if (num != 2) {
+				if (iNT.getNum() != 2) {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
 					// TODO: check if the dictionary is valid
-					dictionary = arg1;}
+					this.dictionary = iNT.getArg1();}
 			}else if (cmd.toLowerCase().equals("define")) { // call define
-				if (num != 2) {
+				if (iNT.getNum() != 2) {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
-					if (arg1.matches("[a-zA-Z_]+$")) {
-						if(debugOn) System.out.println("--> define " + dictionary + " " + arg1);
-						dictServer.sendCommand("define " + dictionary + " " + arg1);
+					if (iNT.getArg1().matches("[a-zA-Z_]+$")) {
+						if(debugOn) System.out.println("--> define " + dictionary + " " + iNT.getArg1());
+						dictServer.sendCommand("define " + dictionary + " " + iNT.getArg1());
 						sR = controller.getsResponse(dictServer, debugOn);
 						if(sR.isSuccess()){
 							System.out.println(sR.getText());
 						}
 					}else System.err.println("902 Invalid argument.");}
-			}else if (cmd.toLowerCase().equals("match")) { // call match
-				if (num != 2) {
+			}else if (iNT.getCmd().toLowerCase().equals("match")) { // call match
+				if (iNT.getNum() != 2) {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
-					if (arg1.matches("[a-zA-Z_]+$")) {
-						if(debugOn) System.out.println("--> match * exact " + arg1);
-						dictServer.sendCommand("match * exact " + arg1);
+					if (iNT.getArg1().matches("[a-zA-Z_]+$")) {
+						if(debugOn) System.out.println("--> match * exact " + iNT.getArg1());
+						dictServer.sendCommand("match * exact " + iNT.getArg1());
 						sR = controller.getsResponse(dictServer, debugOn);
 						if(sR.isSuccess()){
 							System.out.println(sR.getText());
 						}
 					}else System.err.println("902 Invalid argument.");}
-			}else if (cmd.toLowerCase().equals("prefixmatch")) { // call prefixmatch
-				if (num != 2) {
+			}else if (iNT.getCmd().toLowerCase().equals("prefixmatch")) { // call prefixmatch
+				if (iNT.getNum() != 2) {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
-					if (arg1.matches("[a-zA-Z_]+$")) {
-						if(debugOn) System.out.println("--> match * prefix " + arg1);
-						dictServer.sendCommand("match * prefix " + arg1);
+					if (iNT.getArg1().matches("[a-zA-Z_]+$")) {
+						if(debugOn) System.out.println("--> match * prefix " + iNT.getArg1());
+						dictServer.sendCommand("match * prefix " + iNT.getArg1());
 						sR = controller.getsResponse(dictServer, debugOn);
 						if(sR.isSuccess()){
 							System.out.println(sR.getText());
 						}
 					}else System.err.println("902 Invalid argument.");}
-			}else if (cmd.toLowerCase().equals("close")) { // call close
+			}else if (iNT.getCmd().toLowerCase().equals("close")) { // call close
 				// close the connection but remain in the program
 				if(debugOn) System.out.println("--> QUIT");
 				dictServer.sendCommand("QUIT");
-				sR = controller.getsResponse(dictServer, debugOn);
-				if(sR.isSuccess()){
-					System.out.println(sR.getText());
-				}
 				System.out.println("quit the dictionary.");
 			}else if (cmd.toLowerCase().equals("quit")) { // call quit
 				if(debugOn) System.out.println("--> QUIT");
 				dictServer.sendCommand("QUIT");
-				sR = controller.getsResponse(dictServer, debugOn);
-				if(sR.isSuccess()){
-					System.out.println(sR.getText());
-				}
 				System.out.println("See you next time!");
 				System.exit(0);
 			}else {

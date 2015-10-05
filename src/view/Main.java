@@ -20,7 +20,7 @@ public class Main {
 		ServerConnect dictServer = new ServerConnect();
 		ServerResponse sR = new ServerResponse();
 //		DictControl controller = new DictControl();
-		Interpret interpreter;
+		Interpret interpreter = new Interpret();
 		Command cmd;
 		
 		//Check the number of arguments passed to the program
@@ -51,11 +51,18 @@ public class Main {
 							System.out.println("900 Invalid command. connection already opened");
 						}else{
 							System.out.println("Opening connection, Hostname : " + cmd.getArg1());
-							if(cmd.getNumArgs() == 3) dictServer = new ServerConnect(cmd.getArg1(),Integer.parseInt(cmd.getArg2())); //User provides hostname & port
-							else if (cmd.getNumArgs() == 2) dictServer = new ServerConnect(cmd.getArg1()); //User provides only hostname
+							if(cmd.getNumArgs() == 3) {
+								dictServer = new ServerConnect(cmd.getArg1(),Integer.parseInt(cmd.getArg2())); //User provides hostname & port
+								interpreter = new Interpret();
+							}
+							else if (cmd.getNumArgs() == 2) {
+								dictServer = new ServerConnect(cmd.getArg1()); //User provides only hostname
+								interpreter = new Interpret();
+							}
 						}
 					}else{
-						interpreter = new Interpret(cmd, dictServer, sR,debugOn);
+						interpreter.setCommand(cmd);
+						interpreter.interpret(interpreter, dictServer, interpreter.getDictionary(), sR, debugOn);
 						System.out.println("Got here after interpreting.");
 					}
 				}
