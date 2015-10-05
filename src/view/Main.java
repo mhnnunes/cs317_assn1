@@ -7,7 +7,6 @@ import java.io.InputStreamReader;
 import model.*;
 import controller.*;
 import connection.ServerConnect;
-
 public class Main {
 
 	static final int MAX_LEN = 255;
@@ -20,7 +19,7 @@ public class Main {
 		BufferedReader stdIn = new BufferedReader(new InputStreamReader(System.in));
 		ServerConnect dictServer = new ServerConnect();
 		ServerResponse sR = new ServerResponse();
-		DictControl controller = new DictControl();
+//		DictControl controller = new DictControl();
 		Interpret interpreter;
 		Command cmd;
 		
@@ -56,12 +55,8 @@ public class Main {
 							else if (cmd.getNumArgs() == 2) dictServer = new ServerConnect(cmd.getArg1()); //User provides only hostname
 						}
 					}else{
-						interpreter = new Interpret(cmd, dictServer, debugOn);
+						interpreter = new Interpret(cmd, dictServer, sR,debugOn);
 						System.out.println("Got here after interpreting.");
-						sR = controller.getsResponse(dictServer, debugOn);
-						if(sR.isSuccess()){
-							System.out.println(sR.getText());
-						}
 					}
 				}
 			}

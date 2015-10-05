@@ -1,7 +1,10 @@
 package controller;
 
-import model.Command;
+import java.io.IOException;
+
+import model.*;
 import connection.ServerConnect;
+import controller.DictControl;
 // TODO: consider arg2 and arg3
 // TODO: use assert instead of a bunch of throw exceptions
 
@@ -23,7 +26,7 @@ public class Interpret {
 	// the dictionary we choose
 	private static String dictionary;
 
-	public Interpret(Command command, ServerConnect dictServer, boolean debugOn) {
+	public Interpret(Command command, ServerConnect dictServer, ServerResponse sR, boolean debugOn) throws IOException{
 		this.command = command;
 		cmd = command.getArg0();
 		arg1 = command.getArg1();
@@ -32,11 +35,11 @@ public class Interpret {
 		num = command.getNumArgs();
 		dictionary = "*";
 
-		interpret(cmd, dictServer, dictionary, debugOn);
+		interpret(cmd, dictServer, dictionary, sR, debugOn);
 	}
 
-	public static void interpret(String cmd, ServerConnect dictServer, String dictionary, boolean debugOn) {
-
+	public static void interpret(String cmd, ServerConnect dictServer, String dictionary, ServerResponse sR,  boolean debugOn) throws IOException {
+		DictControl controller = new DictControl();
 		if (dictServer.isConnected()) {
 			// call dict
 			// require: connection
@@ -45,7 +48,12 @@ public class Interpret {
 					System.err.println("901 Incorrect number of arguments.");
 				} else {
 					if(debugOn) System.out.println("--> show db");
-					dictServer.sendCommand("show db");}
+					dictServer.sendCommand("show db");
+					sR = controller.getsResponse(dictServer, debugOn);
+					if(sR.isSuccess()){
+						System.out.println(sR.getText());
+					}
+				}
 			}else if (cmd.toLowerCase().equals("set")) { 		//call set
 				if (num != 2) {
 					System.err.println("901 Incorrect number of arguments.");
@@ -59,6 +67,10 @@ public class Interpret {
 					if (arg1.matches("[a-zA-Z_]+$")) {
 						if(debugOn) System.out.println("--> define " + dictionary + " " + arg1);
 						dictServer.sendCommand("define " + dictionary + " " + arg1);
+						sR = controller.getsResponse(dictServer, debugOn);
+						if(sR.isSuccess()){
+							System.out.println(sR.getText());
+						}
 					}else System.err.println("902 Invalid argument.");}
 			}else if (cmd.toLowerCase().equals("match")) { // call match
 				if (num != 2) {
@@ -67,6 +79,10 @@ public class Interpret {
 					if (arg1.matches("[a-zA-Z_]+$")) {
 						if(debugOn) System.out.println("--> match * exact " + arg1);
 						dictServer.sendCommand("match * exact " + arg1);
+						sR = controller.getsResponse(dictServer, debugOn);
+						if(sR.isSuccess()){
+							System.out.println(sR.getText());
+						}
 					}else System.err.println("902 Invalid argument.");}
 			}else if (cmd.toLowerCase().equals("prefixmatch")) { // call prefixmatch
 				if (num != 2) {
@@ -75,15 +91,27 @@ public class Interpret {
 					if (arg1.matches("[a-zA-Z_]+$")) {
 						if(debugOn) System.out.println("--> match * prefix " + arg1);
 						dictServer.sendCommand("match * prefix " + arg1);
+						sR = controller.getsResponse(dictServer, debugOn);
+						if(sR.isSuccess()){
+							System.out.println(sR.getText());
+						}
 					}else System.err.println("902 Invalid argument.");}
 			}else if (cmd.toLowerCase().equals("close")) { // call close
 				// close the connection but remain in the program
 				if(debugOn) System.out.println("--> QUIT");
 				dictServer.sendCommand("QUIT");
+				sR = controller.getsResponse(dictServer, debugOn);
+				if(sR.isSuccess()){
+					System.out.println(sR.getText());
+				}
 				System.out.println("quit the dictionary.");
 			}else if (cmd.toLowerCase().equals("quit")) { // call quit
 				if(debugOn) System.out.println("--> QUIT");
 				dictServer.sendCommand("QUIT");
+				sR = controller.getsResponse(dictServer, debugOn);
+				if(sR.isSuccess()){
+					System.out.println(sR.getText());
+				}
 				System.out.println("See you next time!");
 				System.exit(0);
 			}else {
