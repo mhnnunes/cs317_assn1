@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import model.*;
 import controller.*;
 import connection.ServerConnect;
+
 public class Main {
 
 	static final int MAX_LEN = 255;
