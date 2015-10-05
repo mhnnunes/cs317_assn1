@@ -1,10 +1,4 @@
-import java.io.PrintWriter;
-
-//import java.net.*;
-//import java.util.ArrayList;
-//import java.io.*;
-
-
+import connection.ServerConnect;
 // TODO: consider arg2 and arg3
 // TODO: where to implement open, close, quit?
 // TODO: use assert instead of a bunch of throw exceptions
@@ -20,9 +14,9 @@ public class Interpret {
 	// args
 	private static String arg1;
 
-	private static String arg2;
+	//private static String arg2;
 
-	private static String arg3;
+	//private static String arg3;
 
 	// number of strings; won't be 0
 	private static int num;
@@ -34,8 +28,8 @@ public class Interpret {
 		this.command = command;
 		cmd = command.getArg0();
 		arg1 = command.getArg1();
-		arg2 = command.getArg2();
-		arg3 = command.getArg3();
+		//arg2 = command.getArg2();
+		//arg3 = command.getArg3();
 		num = command.getNumArgs();
 		dictionary = "*";
 
